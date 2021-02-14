@@ -41,7 +41,6 @@ public class Prober
 			String line;
 			while ((line = br.readLine()) != null)
 			{
-				System.out.println(line);
 				// Check if the line contains a profile info
 				if (line.startsWith("[dnxhd @ ") && line.contains("Frame size"))
 				{
