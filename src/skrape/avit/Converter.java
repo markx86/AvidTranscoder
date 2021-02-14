@@ -2,32 +2,42 @@ package skrape.avit;
 
 import java.io.File;
 
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+
 public class Converter 
 {	
 	public static boolean run(File video, VideoInfo vidInfo, int profileIndex)
 	{
-		final String newFilePath = video.getParent().concat(File.separator).concat(video.getName().split("\\.")[0].concat(".mxf"));
+		final String newFilePath = video.getParent().concat(File.separator).concat(video.getName().substring(0, video.getName().lastIndexOf(".")).concat(".mxf"));
 		ProfileInfo profile = vidInfo.availableProfiles[profileIndex];
 		
 		// Get conversion fps
-		String fps = profile.fps;
-		if (fps.equalsIgnoreCase("N/A"))
+		double fps = profile.fps;
+		if (fps <= 0)
 			fps = vidInfo.fps;
 		
-		// Check if the fps is a natural number (like 30/1 fps = 30 fps)
-		String[] fpsParts = fps.split("\\/");
-		if (Integer.parseInt(fpsParts[1]) == 1)
-			fps = fpsParts[0];
-		
-		// Generate run command
-		final String command = "ffmpeg -y -i \"" + video.getAbsolutePath() + "\" -map 0:v -map 0:a -vcodec dnxhd -b:v " + profile.bitrate + " -r " + fps + " -pix_fmt " + profile.pixelFormat + " -acodec pcm_s16le \"" + newFilePath + "\"";
+		// Build job
+		FFmpegBuilder builder = new FFmpegBuilder();
+		builder.setInput(video.getAbsolutePath())
+			   .overrideOutputFiles(true)
+			   .addOutput(newFilePath)
+			   .addExtraArgs("-map", "0:v")
+			   .addExtraArgs("-map", "0:a")
+			   .setAudioCodec("pcm_s16le")
+			   .setVideoCodec("dnxhd")
+			   .setVideoResolution(profile.width, profile.height)
+			   .setVideoBitRate(profile.bitrate)
+			   .setVideoFrameRate(fps)
+			   .setVideoPixelFormat(profile.pixelFormat)
+			   .done();
 		
 		try {
 			
-			// Run the command
-			Process p = Runtime.getRuntime().exec(command);
-			p.waitFor(); // Wait for the process to finish
-		
+			// Run it
+			FFmpegExecutor executor = new FFmpegExecutor(AvidTranscoder.ffmpeg);
+			executor.createJob(builder).run();
+			
 		} catch (Exception e) {
 		
 			e.printStackTrace();

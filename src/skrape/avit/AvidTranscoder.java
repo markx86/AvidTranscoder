@@ -1,12 +1,19 @@
 package skrape.avit;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Main 
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFprobe;
+
+public class AvidTranscoder 
 {
+	public static FFmpeg ffmpeg;
+	public static FFprobe ffprobe;
+	
 	public static enum OS {
 		Linux,
 		Windows,
@@ -34,18 +41,20 @@ public class Main
 	
 	private static int chooseProfile(VideoInfo vidInfo)
 	{
-		float[] minDistance = { Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE };
+		double[] minDistance = { Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE };
 		int profileIndex = 0;
 		
 		for (int i = 0; i < vidInfo.availableProfiles.length; i ++)
 		{
 			ProfileInfo info = vidInfo.availableProfiles[i];
-			float fpsDist = (info.getFPS() < 0) ? 0.0f : Math.abs(info.getFPS() - vidInfo.getFPS());
-			float bitrateDist = (vidInfo.bitrate < 0) ? 0.0f : Math.abs(info.bitrate - vidInfo.bitrate);
-			float resDist = Math.abs(info.width - vidInfo.width) + Math.abs(info.height - vidInfo.height);
+			double fpsDist = (info.fps < 0) ? 0.0d : Math.abs(info.fps - vidInfo.fps);
+			double bitrateDist = (vidInfo.bitrate < 0) ? 0.0f : Math.abs(info.bitrate - vidInfo.bitrate);
+			double resDist = Math.abs(info.width - vidInfo.width) + Math.abs(info.height - vidInfo.height);
 			
 			if (resDist <= minDistance[0] && bitrateDist <= minDistance[1] && fpsDist <= minDistance[2] && info.bitrate < vidInfo.availableProfiles[profileIndex].bitrate)
 			{
+				if (vidInfo.bitrate > info.bitrate && vidInfo.availableProfiles[profileIndex].bitrate > info.bitrate)
+					continue;
 				minDistance[0] = resDist;
 				minDistance[1] = bitrateDist;
 				minDistance[2] = fpsDist;
@@ -56,20 +65,31 @@ public class Main
 		return profileIndex;
 	}
 	
-	private static void checkForFFmpeg()
+	private static void findFFmpeg()
 	{
-		// Find FFmpeg bin folder
 		String[] path = System.getenv("PATH").split("\\".concat(File.pathSeparator));
+		String ext = (hostOS == OS.Windows) ? ".exe" : "";
 		
 		// Horrible code that should work regardless of the OS (please don't hate me, I'm tired it's 3 A.M.)
 		for (String entry : path)
 		{
-			String tmpPath = (entry.endsWith(File.separator)) ? entry.concat("ffmpeg") : entry.concat(File.separator + "ffmpeg");
-			if (hostOS == OS.Windows)
-				tmpPath += ".exe";
+			String tmpPath = ((entry.endsWith(File.separator)) ? entry.concat("ffmpeg") : entry.concat(File.separator + "ffmpeg")) + ext;
 			if ((new File(tmpPath)).exists())
 			{
 				System.out.println("FFmpeg installation found at: " + entry);
+				
+				try {
+				
+					ffmpeg = new FFmpeg(entry.concat(File.separator + "ffmpeg" + ext));
+					ffprobe = new FFprobe(entry.concat(File.separator + "ffprobe" + ext));
+					
+				} catch (IOException e) {
+				
+					e.printStackTrace();
+					System.exit(-3);
+					
+				}
+				
 				return;
 			}
 		}
@@ -112,13 +132,13 @@ public class Main
 		List<File> inputs = new ArrayList<File>();
 		
 		findOS();
-		checkForFFmpeg();
+		findFFmpeg();
 		
 		// Was the program launched from the command line?
 		if (args.length == 0) {
 			
 			// If not ask the user to select some files
-			System.out.println("Please select a input files to transcode");
+			System.out.println("Please select the files to transcode");
 			File[] selected = FileChooser.show("Choose a file or folder");
 			
 			if (selected == null || selected.length == 0)
