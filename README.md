@@ -25,4 +25,4 @@ Right now the program "only" supports `mp4` and `m4v` files. It "should" support
 ------------
 
 ## Developing this atrocity
-If you want to expand on this tool or modify it or, idk, whatever you want it's open-source I don't care, then you'll need to include [this](https://github.com/bramp/ffmpeg-cli-wrapper) library (and it's dependencies) in the javac classpath path.
+If you want to expand on this tool or modify it or, idk, whatever you want it's open-source I don't care, then you'll need to include [this](https://github.com/bramp/ffmpeg-cli-wrapper) library (and it's dependencies) in the javac classpath path (add the jars to the build path if you're using eclipse).
