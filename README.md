@@ -21,3 +21,8 @@ For example:
 
 ## Support
 Right now the program "only" supports `mp4` and `m4v` files. It "should" support more than that. You can test out new formats by adding the extension in the array `SUPPORTED_FORMATS` located in the file `Formats.java`.
+
+------------
+
+## Developing this atrocity
+If you want to expand on this tool or modify it or, idk, whatever you want it's open-source I don't care, then you'll need to include [this](https://github.com/bramp/ffmpeg-cli-wrapper) library (and it's dependencies) in the javac classpath path.
