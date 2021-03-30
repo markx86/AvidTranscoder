@@ -134,6 +134,8 @@ public class AvidTranscoder
 		findOS();
 		findFFmpeg();
 		
+		Formats.buildRegex();
+		
 		// Was the program launched from the command line?
 		if (args.length == 0) {
 			
@@ -143,7 +145,7 @@ public class AvidTranscoder
 			
 			if (selected == null || selected.length == 0)
 			{
-				System.out.println("No file(s) selected! Quitting...");
+				System.out.println("Nothing selected! Quitting...");
 				System.exit(-1);
 			}
 			
@@ -233,7 +235,7 @@ public class AvidTranscoder
 			if (!Converter.run(video, vidInfo, index))
 				System.out.println("Failed to convert \"" + video.getAbsolutePath() + "\"");
 			else
-				System.out.println("\nSuccessfully converted \"" + video.getName() + "\"");
+				System.out.println("\nSuccessfully converted \"" + video.getName() + "\" -> \"" + video.getName().replaceAll(Formats.regex, ".mxf") + "\"");
 		}
 		
 		sc.close();

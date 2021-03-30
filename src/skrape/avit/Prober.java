@@ -240,6 +240,8 @@ public class Prober
 			info.height = stream.height;
 			info.fps = stream.r_frame_rate.doubleValue();
 			info.bitrate = stream.bit_rate;
+			if (info.fps == 0)
+				info.fps = 30;
 			
 		} catch (IOException e) {
 		
