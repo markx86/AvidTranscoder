@@ -51,7 +51,12 @@ public class AvidTranscoder
 			double bitrateDist = (vidInfo.bitrate < 0) ? 0.0f : Math.abs(info.bitrate - vidInfo.bitrate);
 			double resDist = Math.abs(info.width - vidInfo.width) + Math.abs(info.height - vidInfo.height);
 			
-			if (resDist <= minDistance[0] && bitrateDist <= minDistance[1] && fpsDist <= minDistance[2] && info.bitrate < vidInfo.availableProfiles[profileIndex].bitrate)
+			if 
+			(
+				resDist <= minDistance[0] && 
+				bitrateDist <= minDistance[1] && 
+				fpsDist <= minDistance[2] && 
+				info.bitrate < vidInfo.availableProfiles[profileIndex].bitrate)
 			{
 				if (vidInfo.bitrate > info.bitrate && vidInfo.availableProfiles[profileIndex].bitrate > info.bitrate)
 					continue;

@@ -11,6 +11,24 @@ public class Converter
 {	
 	private static String[] getFilter(VideoInfo vidInfo, ProfileInfo profInfo)
 	{
+		if (vidInfo.width == 0)
+			vidInfo.width = profInfo.width;
+		else if (vidInfo.width > profInfo.width) {
+			
+			vidInfo.height = (vidInfo.height / vidInfo.width) * profInfo.width;
+			vidInfo.width = profInfo.width;
+			
+		}
+		
+		if (vidInfo.height == 0)
+			vidInfo.height = profInfo.height;
+		else if (vidInfo.height > profInfo.height) {
+			
+			vidInfo.width = (vidInfo.width / vidInfo.height) * profInfo.height;
+			vidInfo.height = profInfo.height;
+			
+		}
+		
 		int resizeWidth = profInfo.width, resizeHeight = profInfo.height;
 		
 		if (vidInfo.width > vidInfo.height) {
